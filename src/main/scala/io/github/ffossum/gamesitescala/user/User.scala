@@ -1,7 +1,10 @@
 package io.github.ffossum.gamesitescala.user
 
 import io.circe._
-import io.circe.generic.extras.semiauto._
+import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
+import io.circe.generic.semiauto._
+
+import scala.util.Try
 
 case class Email(value: String) extends AnyVal
 object Email {
@@ -17,8 +20,10 @@ object Username {
 
 case class UserId(value: Long) extends AnyVal
 object UserId {
-  implicit val usernameDecoder: Decoder[UserId] = deriveUnwrappedDecoder
-  implicit val usernameEncoder: Encoder[UserId] = deriveUnwrappedEncoder
+  implicit val usernameDecoder: Decoder[UserId] =
+    Decoder.decodeString.emapTry(str => Try(UserId(str.toLong)))
+  implicit val usernameEncoder: Encoder[UserId] =
+    Encoder.encodeString.contramap(_.value.toString)
 }
 
 case class PrivateUserData(
@@ -26,6 +31,10 @@ case class PrivateUserData(
     email: Email,
     username: Username
 )
+object PrivateUserData {
+  implicit val privateUserDataDecoder: Decoder[PrivateUserData] = deriveDecoder
+  implicit val privateUserDataEncoder: Encoder[PrivateUserData] = deriveEncoder
+}
 
 case class PublicUserData(
     id: UserId,

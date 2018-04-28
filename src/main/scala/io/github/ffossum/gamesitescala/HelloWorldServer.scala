@@ -22,7 +22,7 @@ object ServerStream {
   def stream(implicit ec: ExecutionContext) =
     BlazeBuilder[IO]
       .bindHttp(3000, "0.0.0.0")
+      .mountService(loginService, "/api/login")
       .mountService(helloWorldService, "/")
-      .mountService(loginService, "/login")
       .serve
 }

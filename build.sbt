@@ -13,7 +13,8 @@ lazy val root = (project in file("."))
       "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
       "org.scalatest"   %% "scalatest"           % "3.0.5"  % "test",
       "org.scalacheck"  %% "scalacheck"          % "1.13.4" % "test",
-      "ch.qos.logback"  %  "logback-classic"     % LogbackVersion
+      "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
+      "org.mindrot" % "jbcrypt" % "0.4"
     )
   )
 

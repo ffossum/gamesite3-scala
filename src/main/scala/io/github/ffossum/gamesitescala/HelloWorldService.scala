@@ -1,35 +1,50 @@
 package io.github.ffossum.gamesitescala
 
 import cats.effect.Effect
-import org.http4s.HttpService
+import io.circe.syntax._
+import io.github.ffossum.gamesitescala.user.PrivateUserData
 import org.http4s.MediaType.`text/html`
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`Content-Type`
+import org.http4s.server.AuthMiddleware
+import org.http4s.{AuthedService, HttpService}
+
+import scala.language.higherKinds
 
 class HelloWorldService[F[_]: Effect] extends Http4sDsl[F] {
 
-  val service: HttpService[F] = {
-    HttpService[F] {
-      case GET -> _ =>
-        Ok(
-          s"""<!doctype html>
-             |<html lang="en">
-             |<head>
-             |  <meta charset="utf-8">
-             |  <title>Gamesite 3</title>
-             |  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
-             |
-             |  <script src="//localhost:8080/scripts/bundle.js" defer></script>
-             |</head>
-             |
-             |<body>
-             |  <div id="root"></div>
-             |</body>
-             |
-             |</html>
-           """.stripMargin,
-          `Content-Type`(`text/html`)
-        )
+  private val middleware: AuthMiddleware[F, Either[String, PrivateUserData]] =
+    AuthMiddleware.withFallThrough(JwtMiddleware.authUser)
+
+  val authedService: AuthedService[Either[String, PrivateUserData], F] =
+    AuthedService {
+      case GET -> _ as Right(user) => indexHtml(initialStateScript(user))
+      case GET -> _ as Left(_)     => indexHtml()
     }
+
+  val service: HttpService[F] = middleware(authedService)
+
+  def initialStateScript(user: PrivateUserData) = {
+    val userJson = user.asJson
+    s"""<script defer>window.__USER__ = ${userJson.noSpaces};</script>"""
   }
+
+  def indexHtml(initialStateScript: String = "") = Ok(
+    s"""<!doctype html>
+       |<html lang="en">
+       |<head>
+       |  <meta charset="utf-8">
+       |  <title>Gamesite 3</title>
+       |  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
+       |  $initialStateScript
+       |  <script src="//localhost:8080/scripts/bundle.js" defer></script>
+       |</head>
+       |
+       |<body>
+       |  <div id="root"></div>
+       |</body>
+       |
+       |</html>""".stripMargin,
+    `Content-Type`(`text/html`)
+  )
 }

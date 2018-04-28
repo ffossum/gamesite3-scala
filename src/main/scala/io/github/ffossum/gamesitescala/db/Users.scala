@@ -1,11 +1,11 @@
 package io.github.ffossum.gamesitescala.db
 
-import scala.language.higherKinds
 import cats.data.EitherT
-import cats.effect.{Effect, IO}
+import cats.effect.IO
 import cats.implicits._
 import io.github.ffossum.gamesitescala.user._
 
+import scala.language.higherKinds
 import scala.util.Random
 
 case class DbUser(
@@ -13,14 +13,31 @@ case class DbUser(
     username: Username,
     email: Email,
     passwordHash: PasswordHash
-)
+) {
+  def toPrivateUserData: PrivateUserData = PrivateUserData(userId, email, username)
+}
 object DbUser {}
 
 object Users {
   private val users: List[DbUser] = List(
-    DbUser(UserId(1), Username("qwer"), Email("qwer@qwer.com"), PasswordHash("qwerqwer")),
-    DbUser(UserId(2), Username("asdf"), Email("asdf@asdf.com"), PasswordHash("asdfasdf")),
-    DbUser(UserId(3), Username("zxcv"), Email("zxcv@zxcv.com"), PasswordHash("zxcvzxcv")),
+    DbUser(
+      UserId(1),
+      Username("qwer"),
+      Email("qwer@qwer.com"),
+      PasswordHash("$2a$10$NozLFepV2flysA98NoWde.QU6nKII3fYe7L7ZpXdNAQ8M8RnwttZm")
+    ),
+    DbUser(
+      UserId(2),
+      Username("asdf"),
+      Email("asdf@asdf.com"),
+      PasswordHash("$2a$10$Gat0BzSmxw8a9gAq/9PgpOum5iaiM8S5Dq0bYZ7Kcf9i1IJAPQLFm")
+    ),
+    DbUser(
+      UserId(3),
+      Username("zxcv"),
+      Email("zxcv@zxcv.com"),
+      PasswordHash("$2a$10$WJvHFVlPf66GXmXFCFk.k.0Ci7N1OQH8XuM7TMxeVdvM0tg0j/TTy")
+    ),
   )
 
   def createUser(
