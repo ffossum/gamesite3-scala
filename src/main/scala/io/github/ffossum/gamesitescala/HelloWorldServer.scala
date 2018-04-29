@@ -25,11 +25,13 @@ object ServerStream {
 
   def helloWorldService[F[_]: Effect] = new HelloWorldService[F].service
   def loginService                    = new LoginService().service
+  def registrationService             = new RegistrationService().service
 
   def stream(implicit ec: ExecutionContext) =
     BlazeBuilder[IO]
       .bindHttp(3000, "0.0.0.0")
       .mountService(loginService, "/api/login")
+      .mountService(registrationService, "/api/registration")
       .mountService(helloWorldService, "/")
       .serve
 }
