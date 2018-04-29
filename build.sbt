@@ -17,7 +17,8 @@ lazy val root = (project in file("."))
       "org.scalacheck"  %% "scalacheck"          % "1.13.4" % "test",
       "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
       "org.mindrot" % "jbcrypt" % "0.4",
-      "io.deepstream" % "deepstream.io-client-java" % "2.2.2"
+      "io.deepstream" % "deepstream.io-client-java" % "2.2.2",
+      "org.flywaydb" % "flyway-core" % "5.0.7"
     )
   )
 

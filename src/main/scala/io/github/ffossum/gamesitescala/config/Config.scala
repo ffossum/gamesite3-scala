@@ -11,7 +11,6 @@ case class DeepstreamUsername(username: String) extends AnyVal
 case class DeepstreamPassword(password: String) extends AnyVal
 case class JwtSecret(secret: String)            extends AnyVal
 case class PostgresHost(url: URL)               extends AnyVal
-case class HashidSalt(salt: String)             extends AnyVal
 
 case class Config(
     deepstreamHost: DeepstreamHost,
