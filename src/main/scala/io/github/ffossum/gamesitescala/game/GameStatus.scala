@@ -1,7 +1,8 @@
 package io.github.ffossum.gamesitescala.game
 
-import io.circe.{Decoder, Encoder}
 import cats.implicits._
+import doobie.util.meta.Meta
+import io.circe.{Decoder, Encoder}
 
 sealed trait GameStatus {
   def key: String
@@ -23,4 +24,7 @@ object GameStatus {
   implicit val gameStatusDecoder: Decoder[GameStatus] = Decoder.decodeString.emap(str =>
     fromString(str).toRight(s"invalid ${GameStatus.getClass.getSimpleName} key $str"))
 
+  implicit val gameStatusMeta: Meta[GameStatus] = Meta.StringMeta.xmap(unsafeFromString, _.key)
+  def unsafeFromString(s: String): GameStatus =
+    fromString(s).getOrElse(throw doobie.util.invariant.InvalidEnum[GameStatus](s))
 }
