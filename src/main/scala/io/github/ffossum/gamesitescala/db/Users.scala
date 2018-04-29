@@ -25,7 +25,7 @@ object Users {
       password: Password,
   ): EitherT[IO, Throwable, DbUser] = {
 
-    sql"insert into users (username, email, password_hash) values ($username, $email, ${password.hash})".update
+    sql"INSERT INTO users (username, email, password_hash) VALUES ($username, $email, ${password.hash})".update
       .withUniqueGeneratedKeys[DbUser]("id", "username", "email", "password_hash")
       .transact(Database.xa)
       .attemptT

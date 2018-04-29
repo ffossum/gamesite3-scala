@@ -18,8 +18,8 @@ case class Game(
     createdTime: Timestamp,
     host: UserId,
     id: GameId,
-    players: Set[UserId],
-    status: GameStatus
+    otherPlayers: Set[UserId] = Set.empty,
+    status: GameStatus = GameStatus.NotStarted,
 )
 object Game {
   implicit val gameDecoder: Decoder[Game] = deriveDecoder
