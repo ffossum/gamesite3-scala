@@ -11,7 +11,10 @@ import scala.concurrent.ExecutionContext
 object HelloWorldServer extends StreamApp[IO] {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def stream(args: List[String], requestShutdown: IO[Unit]) = ServerStream.stream
+  def stream(args: List[String], requestShutdown: IO[Unit]) = {
+    Deepstream.client.login(Deepstream.credentials)
+    ServerStream.stream
+  }
 }
 
 object ServerStream {

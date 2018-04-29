@@ -8,8 +8,9 @@ import scala.util.Try
 
 case class Password(value: String) extends AnyVal
 object Password {
-  implicit val emailDecoder: Decoder[Password] = deriveUnwrappedDecoder
-  implicit val emailEncoder: Encoder[Password] = deriveUnwrappedEncoder
+  implicit val passwordDecoder: Decoder[Password] = deriveUnwrappedDecoder
+  implicit val passwordEncoder
+    : Encoder[Password] = Encoder.instance(_ => Json.Null) // password should never be exposed to the outside
 
   implicit class HashablePassword(x: Password) {
     lazy val hash: PasswordHash = PasswordHash(hashpw(x.value, gensalt))

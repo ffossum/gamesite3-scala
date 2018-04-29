@@ -12,8 +12,8 @@ import pdi.jwt.{JwtAlgorithm, JwtCirce}
 import scala.language.higherKinds
 
 object JwtMiddleware {
-  val cookieName: String = "token"
-  val key: String        = "secret-key"
+  val cookieName: String = "jwt"
+  val key: String        = "secret"
 
   def authUser[F[_]: Effect: Functor] = Kleisli { (req: Request[F]) =>
     val user: F[Option[Either[String, PrivateUserData]]] =
@@ -39,11 +39,14 @@ object JwtMiddleware {
   def setJwtCookie[F[_]: Effect](userData: PrivateUserData)(res: Response[F]): Response[F] = {
     val jwtString: String = JwtCirce.encode(userData.asJson, key, JwtAlgorithm.HS256)
     res.addCookie(
-      Cookie(cookieName,
-             jwtString,
-             httpOnly = true,
-             domain = None,
-             path = Some("/"),
-             expires = Some(HttpDate.MaxValue)))
+      Cookie(
+        cookieName,
+        jwtString,
+        httpOnly = true,
+        domain = None,
+        path = Some("/"),
+        expires = Some(HttpDate.MaxValue)
+      )
+    )
   }
 }

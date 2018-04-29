@@ -1,6 +1,8 @@
 val Http4sVersion = "0.18.8"
 val LogbackVersion = "1.2.3"
 
+resolvers += "Deepstream" at "https://dl.bintray.com/deepstreamio/maven"
+
 lazy val root = (project in file("."))
   .settings(
     organization := "io.github.ffossum",
@@ -14,7 +16,8 @@ lazy val root = (project in file("."))
       "org.scalatest"   %% "scalatest"           % "3.0.5"  % "test",
       "org.scalacheck"  %% "scalacheck"          % "1.13.4" % "test",
       "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
-      "org.mindrot" % "jbcrypt" % "0.4"
+      "org.mindrot" % "jbcrypt" % "0.4",
+      "io.deepstream" % "deepstream.io-client-java" % "2.2.2"
     )
   )
 
