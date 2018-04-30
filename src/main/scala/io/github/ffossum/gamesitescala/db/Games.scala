@@ -21,7 +21,7 @@ object Games {
 
   def getGame(gameId: GameId): EitherT[IO, Throwable, Game] = {
     sql"SELECT created_time, host_id, other_players, game_status FROM games_view WHERE id=$gameId"
-      .query[(Timestamp, UserId, List[Long], GameStatus)]
+      .query[(Timestamp, UserId, List[Int], GameStatus)]
       .unique
       .map({
         case (createdTime, hostId, otherPlayers, gameStatus) =>

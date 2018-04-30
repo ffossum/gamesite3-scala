@@ -18,10 +18,10 @@ object Username {
   implicit val usernameEncoder: Encoder[Username] = deriveUnwrappedEncoder
 }
 
-case class UserId(value: Long) extends AnyVal
+case class UserId(value: Int) extends AnyVal
 object UserId {
   implicit val usernameDecoder: Decoder[UserId] =
-    Decoder.decodeString.emapTry(str => Try(UserId(str.toLong)))
+    Decoder.decodeString.emapTry(str => Try(UserId(str.toInt)))
   implicit val usernameEncoder: Encoder[UserId] =
     Encoder.encodeString.contramap(_.value.toString)
 }

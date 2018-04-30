@@ -6,10 +6,10 @@ import io.circe.generic.semiauto._
 
 import scala.util.Try
 
-case class GameId(value: Long) extends AnyVal
+case class GameId(value: Int) extends AnyVal
 object GameId {
   implicit val gameIdDecoder: Decoder[GameId] =
-    Decoder.decodeString.emapTry(str => Try(GameId(str.toLong)))
+    Decoder.decodeString.emapTry(str => Try(GameId(str.toInt)))
   implicit val gameIdEncoder: Encoder[GameId] =
     Encoder.encodeString.contramap(_.value.toString)
 }
