@@ -6,11 +6,9 @@ import cats.implicits._
 import doobie.implicits._
 import doobie.postgres.implicits._
 import doobie.util.meta.Meta
-import io.github.ffossum.gamesitescala.game.GameStatus.{NotStarted, fromString}
+import io.github.ffossum.gamesitescala.game.GameStatus.fromString
 import io.github.ffossum.gamesitescala.game.{Game, GameId, GameStatus, Timestamp}
 import io.github.ffossum.gamesitescala.user.UserId
-
-class Games {}
 
 object Games {
   implicit val gameStatusMeta: Meta[GameStatus] =
@@ -43,7 +41,7 @@ object Games {
       .attemptT
   }
 
-  def getGame(gameId: GameId): EitherT[IO, Throwable, Game] = {
+  private def getGameQuery(gameId: GameId) =
     sql"""
       SELECT created_time, host_id, other_players, game_status
       FROM games_view
@@ -55,7 +53,28 @@ object Games {
         case (createdTime, hostId, otherPlayers, gameStatus) =>
           Game(createdTime, hostId, gameId, otherPlayers, gameStatus)
       })
+
+  def getGame(gameId: GameId): EitherT[IO, Throwable, Game] = {
+    getGameQuery(gameId)
       .transact(Database.xa)
       .attemptT
+  }
+
+  def addPlayer(gameId: GameId, userId: UserId): EitherT[IO, Throwable, Game] = {
+    val query = for {
+      _    <- sql"INSERT INTO games_users (game_id, user_id) VALUES ($gameId, $userId)".update.run
+      game <- getGameQuery(gameId)
+    } yield game
+
+    query.transact(Database.xa).attemptT
+  }
+
+  def removePlayer(gameId: GameId, userId: UserId): EitherT[IO, Throwable, Game] = {
+    val query = for {
+      _    <- sql"DELETE FROM games_users WHERE game_id=$gameId AND user_id=$userId".update.run
+      game <- getGameQuery(gameId)
+    } yield game
+
+    query.transact(Database.xa).attemptT
   }
 }
