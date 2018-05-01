@@ -40,3 +40,8 @@ case class PublicUserData(
     id: UserId,
     username: Username
 )
+
+object PublicUserData {
+  implicit val decoder: Decoder[PublicUserData] = deriveDecoder
+  implicit val encoder: Encoder[PublicUserData] = deriveEncoder
+}

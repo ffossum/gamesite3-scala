@@ -16,7 +16,7 @@ object Games {
   implicit val gameStatusMeta: Meta[GameStatus] =
     pgEnumStringOpt("game_status", fromString, _.key)
 
-  implicit val userIdListMeta: Meta[Set[UserId]] =
+  implicit val userIdSetMeta: Meta[Set[UserId]] =
     Meta[Array[Int]].xmap(_.toSet.map(UserId.apply), _.map(_.value).toArray)
 
   def createGame(hostId: UserId): EitherT[IO, Throwable, Game] = {

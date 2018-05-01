@@ -45,6 +45,7 @@ object HelloWorldServer extends StreamApp[IO] {
 object ServerStream {
 
   def helloWorldService[F[_]: Effect] = new HelloWorldService[F].service
+  def apiService                      = new ApiService().service
   def loginService                    = new LoginService().service
   def registrationService             = new RegistrationService().service
 
@@ -53,6 +54,7 @@ object ServerStream {
       .bindHttp(3000, "0.0.0.0")
       .mountService(loginService, "/api/login")
       .mountService(registrationService, "/api/registration")
+      .mountService(apiService, "/api")
       .mountService(helloWorldService, "/")
       .serve
 }
