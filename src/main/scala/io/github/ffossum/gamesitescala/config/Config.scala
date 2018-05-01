@@ -30,7 +30,7 @@ private object ConfigKeys {
 object Config {
   import ConfigKeys._
 
-  implicit val globalConfig: Config = validateConfig(sys.env).right.get
+  implicit lazy val globalConfig: Config = validateConfig(sys.env).right.get
 
   type Env             = Map[String, String]
   type ConfigResult[A] = ValidatedNel[String, A]

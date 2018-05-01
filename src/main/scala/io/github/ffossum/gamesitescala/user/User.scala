@@ -20,10 +20,10 @@ object Username {
 
 case class UserId(value: Int) extends AnyVal
 object UserId {
-  implicit val usernameDecoder: Decoder[UserId] =
-    Decoder.decodeString.emapTry(str => Try(UserId(str.toInt)))
-  implicit val usernameEncoder: Encoder[UserId] =
-    Encoder.encodeString.contramap(_.value.toString)
+  implicit val userIdDecoder: Decoder[UserId] =
+    Decoder[String].emapTry(str => Try(UserId(str.toInt)))
+  implicit val userIdEncoder: Encoder[UserId] =
+    Encoder[String].contramap(_.value.toString)
 }
 
 case class PrivateUserData(

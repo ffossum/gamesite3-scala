@@ -14,7 +14,7 @@ class TimestampTest extends FunSuite with Matchers {
     timestamp.value shouldBe a[Instant]
   }
   test("parse an ISO string") {
-    Timestamp.parse("2018-04-29T09:09:34.920Z") shouldBe a[Success[Timestamp]]
+    Timestamp.parse("2018-04-29T09:09:34.920Z") shouldBe a[Success[_]]
   }
   test("json encode/decode") {
     val timestamp = Timestamp.now[IO].unsafeRunSync
