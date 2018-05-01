@@ -1,17 +1,19 @@
 package io.github.ffossum.gamesitescala
 
+import cats.data.EitherT
 import cats.effect.{Effect, IO}
 import cats.implicits._
 import fs2.StreamApp
+import io.circe.parser.parse
 import io.deepstream.RpcResponse
 import io.github.ffossum.gamesitescala.db.Games
 import io.github.ffossum.gamesitescala.util.GsonSyntax._
 import org.flywaydb.core.Flyway
 import org.http4s.server.blaze.BlazeBuilder
+import org.log4s._
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
-import org.log4s._
 object HelloWorldServer extends StreamApp[IO] {
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -24,6 +26,26 @@ object HelloWorldServer extends StreamApp[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]) = {
     Deepstream.client.login(Deepstream.credentials)
 
+    Deepstream.client.rpc.provide(
+      "create-game",
+      (s: String, o: Any, rpcResponse: RpcResponse) => {
+        val game = for {
+          json          <- EitherT.fromEither[IO](parse(o.toString))
+          createGameReq <- json.as[CreateGameReq].toEitherT[IO]
+          game          <- Games.createGame(createGameReq.uid)
+          _ <- IO(
+            Deepstream.client.event
+              .emit("lobby", DeepstreamEvent("create-game", game).asGson)).attemptT
+          _ <- IO(rpcResponse.send(game.asGson)).attemptT
+
+        } yield ()
+
+        game.value.unsafeRunSync match {
+          case Left(t) => log.error(t)("failed to create game")
+          case _       => ()
+        }
+      }
+    )
     Deepstream.client.rpc.provide(
       "refresh-lobby",
       (s: String, o: Any, rpcResponse: RpcResponse) => {

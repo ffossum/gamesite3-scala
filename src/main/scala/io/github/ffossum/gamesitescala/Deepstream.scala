@@ -1,10 +1,21 @@
 package io.github.ffossum.gamesitescala
 import com.google.gson.JsonObject
+import io.circe.generic.semiauto._
+import io.circe.{Decoder, Encoder}
 import io.deepstream._
+import io.github.ffossum.gamesitescala.user.UserId
 
 import scala.language.higherKinds
 
-sealed trait DeepstreamEvent
+case class DeepstreamEvent[+Payload](t: String, p: Payload)
+object DeepstreamEvent {
+  implicit def encoder[Payload: Encoder]: Encoder[DeepstreamEvent[Payload]] = deriveEncoder
+}
+
+case class CreateGameReq(uid: UserId)
+object CreateGameReq {
+  implicit val decoder: Decoder[CreateGameReq] = deriveDecoder
+}
 
 object Deepstream {
   private val DEEPSTREAM_USERNAME = "secret server username"
