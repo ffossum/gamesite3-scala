@@ -13,13 +13,13 @@ import scala.language.higherKinds
 
 class HelloWorldService[F[_]: Effect] extends Http4sDsl[F] {
 
-  private val middleware: AuthMiddleware[F, Either[String, PrivateUserData]] =
-    AuthMiddleware.withFallThrough(JwtMiddleware.authUser)
+  private val middleware: AuthMiddleware[F, Option[PrivateUserData]] =
+    AuthMiddleware.withFallThrough(JwtMiddleware.authUserOptional)
 
-  val authedService: AuthedService[Either[String, PrivateUserData], F] =
+  val authedService: AuthedService[Option[PrivateUserData], F] =
     AuthedService {
-      case GET -> _ as Right(user) => indexHtml(initialStateScript(user))
-      case GET -> _ as Left(_)     => indexHtml()
+      case GET -> _ as Some(user) => indexHtml(initialStateScript(user))
+      case GET -> _ as None       => indexHtml()
     }
 
   val service: HttpService[F] = middleware(authedService)

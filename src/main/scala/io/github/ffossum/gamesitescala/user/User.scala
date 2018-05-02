@@ -1,5 +1,7 @@
 package io.github.ffossum.gamesitescala.user
 
+import cats.Eq
+import cats.implicits._
 import io.circe._
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import io.circe.generic.semiauto._
@@ -24,6 +26,8 @@ object UserId {
     Decoder[String].emapTry(str => Try(UserId(str.toInt)))
   implicit val userIdEncoder: Encoder[UserId] =
     Encoder[String].contramap(_.value.toString)
+
+  implicit val userIdEq: Eq[UserId] = Eq.instance((a, b) => a.value === b.value)
 }
 
 case class PrivateUserData(

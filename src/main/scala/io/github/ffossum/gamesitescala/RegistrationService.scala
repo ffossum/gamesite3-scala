@@ -14,11 +14,8 @@ import org.http4s.{EntityDecoder, HttpService}
 
 case class Registration(username: Username, email: Email, password: Password)
 object Registration {
-  implicit val registrationEncoder: Encoder[Registration] = deriveEncoder
-  implicit val registrationDecoder: Decoder[Registration] = deriveDecoder
-
+  implicit val registrationDecoder: Decoder[Registration]                 = deriveDecoder
   implicit val registrationEntityDecoder: EntityDecoder[IO, Registration] = jsonOf[IO, Registration]
-
 }
 
 class RegistrationService extends Http4sDsl[IO] {

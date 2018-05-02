@@ -2,7 +2,7 @@ package io.github.ffossum.gamesitescala
 
 import cats.Functor
 import cats.data.{EitherT, Kleisli, OptionT}
-import cats.effect.Effect
+import cats.effect.{Effect, IO}
 import cats.implicits._
 import io.circe.syntax._
 import io.github.ffossum.gamesitescala.user.PrivateUserData
@@ -15,10 +15,12 @@ object JwtMiddleware {
   val cookieName: String = "jwt"
   val key: String        = "secret"
 
-  def authUser[F[_]: Effect: Functor] = Kleisli { (req: Request[F]) =>
-    val user: F[Option[Either[String, PrivateUserData]]] =
-      readJwtCookie(req).value.map(Option.apply)
-    OptionT(user)
+  def authUserRequired[F[_]: Effect: Functor] = Kleisli { (req: Request[F]) =>
+    OptionT(readJwtCookie(req).value.map(_.toOption))
+  }
+
+  def authUserOptional[F[_]: Effect: Functor] = Kleisli { (req: Request[F]) =>
+    OptionT(readJwtCookie(req).value.map(_.toOption).map(Option(_)))
   }
 
   def readJwtCookie[F[_]: Effect](req: Request[F]): EitherT[F, String, PrivateUserData] = {
