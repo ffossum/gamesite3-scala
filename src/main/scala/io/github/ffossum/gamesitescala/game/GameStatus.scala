@@ -14,8 +14,14 @@ object GameStatus {
   case object InProgress extends GameStatus {
     override val key: String = "in_progress"
   }
+  case object Canceled extends GameStatus {
+    override val key: String = "canceled"
+  }
+  case object Ended extends GameStatus {
+    override val key: String = "ended"
+  }
 
-  val values = List(NotStarted, InProgress)
+  val values = List(NotStarted, InProgress, Canceled, Ended)
 
   def fromString(key: String): Option[GameStatus] = values.find(_.key === key)
 

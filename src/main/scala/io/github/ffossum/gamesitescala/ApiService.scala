@@ -86,7 +86,6 @@ class ApiService extends Http4sDsl[IO] {
           case Right(game)  => Ok(game.asJson)
           case Left(status) => IO(Response(status))
         })
-
       }
     }
 

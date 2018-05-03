@@ -1,4 +1,4 @@
-CREATE TYPE game_status AS ENUM ('not_started', 'in_progress');
+CREATE TYPE game_status AS ENUM ('not_started', 'in_progress', 'canceled', 'ended');
 
 CREATE TABLE games (
     id serial PRIMARY KEY,
