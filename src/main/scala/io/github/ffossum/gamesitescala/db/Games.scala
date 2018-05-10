@@ -61,25 +61,25 @@ object Games {
   }
 
   def addPlayer(gameId: GameId, userId: UserId): EitherT[IO, Throwable, Game] = {
-    val query = for {
+    val cmd = for {
       _    <- sql"INSERT INTO games_users (game_id, user_id) VALUES ($gameId, $userId)".update.run
       game <- getGameQuery(gameId)
     } yield game
 
-    query.transact(Database.xa).attemptT
+    cmd.transact(Database.xa).attemptT
   }
 
   def removePlayer(gameId: GameId, userId: UserId): EitherT[IO, Throwable, Game] = {
-    val query = for {
+    val cmd = for {
       _    <- sql"DELETE FROM games_users WHERE game_id=$gameId AND user_id=$userId".update.run
       game <- getGameQuery(gameId)
     } yield game
 
-    query.transact(Database.xa).attemptT
+    cmd.transact(Database.xa).attemptT
   }
 
   def cancelGame(gameId: GameId, canceledBy: UserId): EitherT[IO, Throwable, Game] = {
-    val query = for {
+    val cmd = for {
       _    <- sql"""
         UPDATE games
         SET game_status = ${Canceled: GameStatus}
@@ -88,6 +88,19 @@ object Games {
       game <- getGameQuery(gameId)
     } yield game
 
-    query.transact(Database.xa).attemptT
+    cmd.transact(Database.xa).attemptT
+  }
+
+  def startGame(gameId: GameId, startedBy: UserId): EitherT[IO, Throwable, Game] = {
+    val cmd = for {
+      _    <- sql"""
+        UPDATE games
+        SET game_status = ${InProgress: GameStatus}
+        WHERE id=$gameId AND host_id=$startedBy
+        """.update.run
+      game <- getGameQuery(gameId)
+    } yield game
+
+    cmd.transact(Database.xa).attemptT
   }
 }

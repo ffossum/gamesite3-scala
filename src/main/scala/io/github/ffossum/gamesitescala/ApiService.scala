@@ -54,6 +54,13 @@ class ApiService extends Http4sDsl[IO] {
           case _ => BadRequest()
         }
       }
+
+      case GET -> Root / "lobby" =>
+        Games.getLobbyGames.value.flatMap({
+          case Right(games) => Ok(games.asJson)
+          case Left(_)      => InternalServerError()
+        })
+
       case GET -> Root / "game" / GameIdVar(gameId) => {
         Games
           .getGame(gameId)
@@ -67,6 +74,16 @@ class ApiService extends Http4sDsl[IO] {
 
   val authedService: AuthedService[PrivateUserData, IO] =
     AuthedService {
+      case POST -> Root / "game" / "create" as user => {
+        Games
+          .createGame(user.id)
+          .value
+          .flatMap({
+            case Right(game) => Ok(game.asJson)
+            case Left(_)     => InternalServerError()
+          })
+      }
+
       case authedReq @ POST -> Root / "game" / "join" as user => {
 
         val result: EitherT[IO, Status, Game] = for {
@@ -87,6 +104,28 @@ class ApiService extends Http4sDsl[IO] {
           case Left(status) => IO(Response(status))
         })
       }
+
+      case authedReq @ POST -> Root / "game" / "leave" as user => {
+
+        val result: EitherT[IO, Status, Game] = for {
+          gamePlayerId <- authedReq.req
+            .as[GamePlayerId]
+            .attemptT
+            .leftMap(_ => Status.BadRequest)
+          game <- if (gamePlayerId.userId === user.id)
+            EitherT.fromEither[IO](Left(Status.Forbidden))
+          else
+            Games
+              .removePlayer(gamePlayerId.gameId, gamePlayerId.userId)
+              .leftMap(_ => Status.InternalServerError)
+        } yield game
+
+        result.value.flatMap({
+          case Right(game)  => Ok(game.asJson)
+          case Left(status) => IO(Response(status))
+        })
+      }
+
     }
 
   private val middleware: AuthMiddleware[IO, PrivateUserData] =
