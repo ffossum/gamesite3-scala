@@ -8,7 +8,7 @@ import org.scalacheck.Prop._
 class PasswordTest extends FunSuite with Matchers with Checkers {
 
   test("hashed password is valid") {
-    check { (rawPassword: String) =>
+    check { rawPassword: String =>
       val pwd = Password(rawPassword)
       PasswordHash.checkPassword(pwd, pwd.hash)
     }
