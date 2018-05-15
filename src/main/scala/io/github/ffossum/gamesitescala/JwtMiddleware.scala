@@ -1,8 +1,8 @@
 package io.github.ffossum.gamesitescala
 
 import cats.Functor
-import cats.data.{EitherT, Kleisli, OptionT}
-import cats.effect.{Effect, IO}
+import cats.data.{Kleisli, OptionT}
+import cats.effect.Effect
 import cats.implicits._
 import io.circe.syntax._
 import io.github.ffossum.gamesitescala.user.PrivateUserData
@@ -15,16 +15,16 @@ object JwtMiddleware {
   val cookieName: String = "jwt"
   val key: String        = "secret"
 
-  def authUserRequired[F[_]: Effect: Functor] = Kleisli { (req: Request[F]) =>
-    OptionT(readJwtCookie(req).value.map(_.toOption))
+  def authUserRequired[F[_]: Effect: Functor] = Kleisli { req: Request[F] =>
+    OptionT(readJwtCookie(req).toOption.pure[F])
   }
 
-  def authUserOptional[F[_]: Effect: Functor] = Kleisli { (req: Request[F]) =>
-    OptionT(readJwtCookie(req).value.map(_.toOption).map(Option(_)))
+  def authUserOptional[F[_]: Effect: Functor] = Kleisli { req: Request[F] =>
+    OptionT.liftF(readJwtCookie(req).toOption.pure[F])
   }
 
-  def readJwtCookie[F[_]: Effect](req: Request[F]): EitherT[F, String, PrivateUserData] = {
-    val userEither = for {
+  def readJwtCookie[F[_]: Effect](req: Request[F]): Either[String, PrivateUserData] = {
+    for {
       header <- headers.Cookie.from(req.headers).toRight("cookie header not found")
       cookie <- header.values.toList.find(_.name === cookieName).toRight("token cookie not found")
       token = cookie.content
@@ -35,7 +35,6 @@ object JwtMiddleware {
         .map(_.getMessage)
       user <- userJson.as[PrivateUserData].left.map(_.getMessage)
     } yield user
-    EitherT.fromEither[F](userEither)
   }
 
   def setJwtCookie[F[_]: Effect](userData: PrivateUserData)(res: Response[F]): Response[F] = {
