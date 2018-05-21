@@ -10,7 +10,7 @@ import io.github.ffossum.gamesitescala.db.Users._
 import io.github.ffossum.gamesitescala.user.{Email, Password, Username}
 import org.http4s.circe.{jsonOf, _}
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{EntityDecoder, HttpService}
+import org.http4s.{EntityDecoder, HttpService, Response}
 
 case class Registration(username: Username, email: Email, password: Password)
 object Registration {
@@ -23,12 +23,14 @@ class RegistrationService extends Http4sDsl[IO] {
     HttpService[IO] {
       case req @ POST -> Root => {
         val res = for {
-          registration <- req.as[Registration].attemptT
-          user         <- createUser(registration.username, registration.email, registration.password)
+          registration <- req.attemptAs[Registration].leftMap(_ => BadRequest)
+          user <- createUser(registration.username, registration.email, registration.password)
+            .leftMap(_ => Forbidden)
           privateUserData = user.toPrivateUserData
         } yield Ok(privateUserData.asJson).map(setJwtCookie(privateUserData))
 
-        res.value.flatMap(_.getOrElse(InternalServerError()))
+        res.value.flatMap(_.fold(status => IO(Response(status)), identity))
+
       }
     }
   }
