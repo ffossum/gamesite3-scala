@@ -37,7 +37,7 @@ class HelloWorldService[F[_]: Effect] extends Http4sDsl[F] {
        |  <title>Gamesite 3</title>
        |  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
        |  $initialStateScript
-       |  <script src="//localhost:8080/scripts/bundle.js" defer></script>
+       |  <script src="//localhost:8080/main.bundle.js" defer></script>
        |</head>
        |
        |<body>
