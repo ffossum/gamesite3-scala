@@ -39,6 +39,7 @@ object JwtMiddleware {
 
   def setJwtCookie[F[_]: Effect](userData: PrivateUserData)(res: Response[F]): Response[F] = {
     val jwtString: String = JwtCirce.encode(userData.asJson, key, JwtAlgorithm.HS256)
+
     res.addCookie(
       Cookie(
         cookieName,
@@ -50,4 +51,6 @@ object JwtMiddleware {
       )
     )
   }
+
+  def removeJwtCookie[F[_]: Effect](res: Response[F]): Response[F] = res.removeCookie(cookieName)
 }
